@@ -1,4 +1,5 @@
 import type { PortfolioDocument, PortfolioItem, PortfolioSection } from '../portfolio/portfolio-types';
+import { GitHubContributions } from './GitHubContributions';
 import { MarkdownContent } from './MarkdownContent';
 
 function heading(markdown: string, level: number): string {
@@ -47,6 +48,12 @@ function Skills({ section }: { section: PortfolioSection }) {
   </section>;
 }
 
+function githubProfile(markdown: string): { username: string; profileUrl: string; avatarUrl: string } | undefined {
+  const match = markdown.match(/\[[^\]]*github[^\]]*\]\((https:\/\/github\.com\/([^/)]+))\/?\)/i);
+  if (!match) return undefined;
+  return { username: match[2], profileUrl: match[1], avatarUrl: `${match[1]}.png?size=160` };
+}
+
 function ContactLinks({ markdown }: { markdown: string }) {
   const links = [...markdown.matchAll(/\[([^\]]+)\]\((https?:\/\/[^)]+|mailto:[^)]+)\)/g)];
   return <nav className="social-links" aria-label="Contact and social links">
@@ -61,7 +68,7 @@ function PortfolioSection({ section, page }: { section: PortfolioSection; page: 
   </section>;
   if (section.type === 'skills') return <Skills section={section} />;
   if (section.type === 'markdown' || section.type === 'experience') return <section className="content-section prose-section" id={section.id}>
-    {section.metadata.title && <SectionLabel>{String(section.metadata.title).toLowerCase()}</SectionLabel>}
+    {typeof section.metadata.title === 'string' && <SectionLabel>{section.metadata.title.toLowerCase()}</SectionLabel>}
     <MarkdownContent>{withoutHeading(section.markdown)}</MarkdownContent>
   </section>;
   return null;
@@ -79,6 +86,7 @@ export function Portfolio({ document, page = 'home' }: { document: PortfolioDocu
   const heroParts = heroContent.split(/\n\s*\n/);
   const intro = heroParts.filter((part) => !/\[[^\]]+\]\([^)]+\)/.test(part)).join('\n\n') || heroContent;
   const contactContent = heroParts.filter((part) => /\[[^\]]+\]\([^)]+\)/.test(part)).join('\n\n');
+  const github = githubProfile(contactContent);
 
   return <div className="page-shell">
     <header className="site-header"><nav aria-label="Main navigation">
@@ -87,11 +95,19 @@ export function Portfolio({ document, page = 'home' }: { document: PortfolioDocu
       <a href="/#skills">toolkit</a>
     </nav></header>
     <main>
-      {page === 'home' ? <section className="intro" id="intro">
-        <h1>{hero ? heading(hero.markdown, 1) : 'Portfolio'}</h1>
-        {subtitle && <p className="intro-meta">{subtitle}</p>}
-        <MarkdownContent className="intro-copy">{intro}</MarkdownContent>
-      </section> : <section className="intro projects-intro"><a className="back-link" href="/#intro">← home</a><h1>Projects</h1><p className="intro-meta">AI &amp; agents · full-stack products · systems &amp; infrastructure</p></section>}
+      {page === 'home' ? <>
+        <section className="intro" id="intro">
+          <div className="intro-heading">
+            <h1>{hero ? heading(hero.markdown, 1) : 'Portfolio'}</h1>
+            {github && <a className="profile-avatar-link" href={github.profileUrl} target="_blank" rel="noreferrer" aria-label="View Nishchay Kumar's GitHub profile">
+              <img className="profile-avatar" src={github.avatarUrl} alt="" width="40" height="40" />
+            </a>}
+          </div>
+          {subtitle && <p className="intro-meta">{subtitle}</p>}
+          <MarkdownContent className="intro-copy">{intro}</MarkdownContent>
+        </section>
+        {github && <GitHubContributions username={github.username} profileUrl={github.profileUrl} />}
+      </> : <section className="intro projects-intro"><a className="back-link" href="/#intro">← home</a><h1>Projects</h1><p className="intro-meta">AI &amp; agents · full-stack products · systems &amp; infrastructure</p></section>}
       {sections.map((section) => <PortfolioSection section={section} page={page} key={section.id} />)}
     </main>
     <footer className="site-footer"><ContactLinks markdown={contactContent} /><span>© {new Date().getFullYear()} Nishchay Kumar</span></footer>
