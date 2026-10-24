@@ -1,0 +1,26 @@
+{
+  "name": "nishchay-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run portfolio:validate && tsc -b && vite build",
+    "preview": "vite preview",
+    "portfolio:validate": "node --experimental-strip-types scripts/validate-portfolio.ts",
+    "github:activity": "node --experimental-strip-types scripts/generate-github-activity.ts"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
+  }
+}
