@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { PortfolioDocument, PortfolioItem, PortfolioSection } from '../portfolio/portfolio-types';
 import { GitHubContributions } from './GitHubContributions';
 import { MarkdownContent } from './MarkdownContent';
@@ -41,10 +42,58 @@ function SectionLabel({ children, href }: { children: string; href?: string }) {
   return <div className="section-label"><h2>{children}</h2>{href && <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>see all →</a>}</div>;
 }
 
+const projectCategories = ['All', 'AI', 'Product', 'Backend', 'Systems'];
+
+function projectCategory(item: PortfolioItem): string {
+  const category = typeof item.metadata.category === 'string' ? item.metadata.category : '';
+  return category.split('·')[0]?.trim() || 'Other';
+}
+
+function ProjectsPage({ sections }: { sections: PortfolioSection[] }) {
+  const [category, setCategory] = useState('All');
+  const items = sections.flatMap((section) => section.items);
+  const uniqueItems = [...new Map(items.map((item) => [item.id, item])).values()];
+  const visibleItems = category === 'All' ? uniqueItems : uniqueItems.filter((item) => projectCategory(item).toLowerCase() === category.toLowerCase());
+
+  return <section className="content-section" id="all-projects">
+    <div className="project-filters" role="group" aria-label="Filter projects by category">
+      {projectCategories.map((filter) => <button key={filter} type="button" aria-pressed={category === filter} onClick={() => setCategory(filter)}>{filter}</button>)}
+    </div>
+    <div className="project-list">{visibleItems.map((item) => <ProjectRow key={item.id} item={item} />)}</div>
+  </section>;
+}
+
 function Skills({ section }: { section: PortfolioSection }) {
+  const badgeTones: Record<string, string> = {
+    'agent harnesses': 'indigo',
+    'reliable multi-step workflows': 'purple',
+    RAG: 'violet',
+    'evaluation systems': 'violet',
+    'full-stack applications': 'blue',
+    'AI pipelines': 'violet',
+    'developer tools': 'teal',
+    APIs: 'teal',
+    databases: 'blue',
+    'distributed systems': 'indigo',
+    'open source': 'amber',
+  };
+  const groups = withoutHeading(section.markdown).split(/\r?\n/).flatMap((line) => {
+    const match = line.match(/^\s*-\s+\*\*(.+?)(?::\*\*|\*\*:)\s*(.+)$/);
+    if (!match) return [];
+    const topics = match[2].split(/,\s*|\s+and\s+/i).map((topic) => topic.replace(/^and\s+/i, '').trim()).filter(Boolean);
+    return [{ label: match[1].trim(), topics }];
+  });
+
   return <section className="content-section" id={section.id}>
     <SectionLabel>{String(section.metadata.title ?? 'toolkit').toLowerCase()}</SectionLabel>
-    <MarkdownContent className="skills-list">{withoutHeading(section.markdown)}</MarkdownContent>
+    <div className="skills-list">
+      {groups.map((group) => <div className="skills-group" key={group.label}>
+        <h3 className="skills-group-heading"><samp><b>› {group.label.toUpperCase()}</b></samp></h3>
+        <ul className="skills-badges" aria-label={group.label}>
+          {group.topics.map((topic) => <li key={topic} data-tone={badgeTones[topic] ?? 'blue'}>{topic}</li>)}
+        </ul>
+      </div>)}
+    </div>
   </section>;
 }
 
@@ -89,26 +138,30 @@ export function Portfolio({ document, page = 'home' }: { document: PortfolioDocu
   const github = githubProfile(contactContent);
 
   return <div className="page-shell">
-    <header className="site-header"><nav aria-label="Main navigation">
-      <a href="/#intro" aria-current={page === 'home' ? 'page' : undefined}>home</a>
-      <a href="/projects/" aria-current={page === 'projects' ? 'page' : undefined}>projects</a>
-      <a href="/#skills">toolkit</a>
-    </nav></header>
+    <header className="site-header">
+      <nav aria-label="Main navigation">
+        <a href="/#intro" aria-current={page === 'home' ? 'page' : undefined}>home</a>
+        <a href="/projects/" aria-current={page === 'projects' ? 'page' : undefined}>projects</a>
+        <a href="/#skills">toolkit</a>
+      </nav>
+      {github && <a className="profile-avatar-link header-avatar" href={github.profileUrl} target="_blank" rel="noreferrer" aria-label="View Nishchay Kumar's GitHub profile">
+        <img className="profile-avatar" src={github.avatarUrl} alt="" width="36" height="36" />
+      </a>}
+    </header>
     <main>
       {page === 'home' ? <>
         <section className="intro" id="intro">
           <div className="intro-heading">
             <h1>{hero ? heading(hero.markdown, 1) : 'Portfolio'}</h1>
-            {github && <a className="profile-avatar-link" href={github.profileUrl} target="_blank" rel="noreferrer" aria-label="View Nishchay Kumar's GitHub profile">
-              <img className="profile-avatar" src={github.avatarUrl} alt="" width="40" height="40" />
-            </a>}
           </div>
           {subtitle && <p className="intro-meta">{subtitle}</p>}
           <MarkdownContent className="intro-copy">{intro}</MarkdownContent>
         </section>
         {github && <GitHubContributions username={github.username} profileUrl={github.profileUrl} />}
       </> : <section className="intro projects-intro"><a className="back-link" href="/#intro">← home</a><h1>Projects</h1><p className="intro-meta">AI &amp; agents · full-stack products · systems &amp; infrastructure</p></section>}
-      {sections.map((section) => <PortfolioSection section={section} page={page} key={section.id} />)}
+      {page === 'projects'
+        ? <ProjectsPage sections={sections.filter((section) => section.type === 'project-grid')} />
+        : sections.map((section) => <PortfolioSection section={section} page={page} key={section.id} />)}
     </main>
     <footer className="site-footer"><ContactLinks markdown={contactContent} /><span>© {new Date().getFullYear()} Nishchay Kumar</span></footer>
   </div>;

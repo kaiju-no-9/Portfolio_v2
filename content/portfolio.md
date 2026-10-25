@@ -50,8 +50,8 @@ An event photo retrieval platform. Organizers upload event photos; attendees sub
 <!-- portfolio:enditem -->
 <!-- portfolio:endsection -->
 
-<!-- portfolio:section {"id":"more-projects","type":"project-grid","title":"More projects","eyebrow":"SYSTEMS, PRODUCTS & EXPERIMENTS"} -->
-## More projects
+<!-- portfolio:section {"id":"more-projects","type":"project-grid","title":"Projects","eyebrow":"SYSTEMS, PRODUCTS & EXPERIMENTS"} -->
+## Projects
 
 <!-- portfolio:item {"id":"t8t","type":"project","tagline":"node-based crypto workflows","category":"product · automation","repo":"https://github.com/kaiju-no-9/t-8-t","stack":["React","TypeScript","Bun","MongoDB"]} -->
 ### t8t
@@ -78,6 +78,22 @@ A learning project for a concurrent key-value cache with TTL expiration, LRU evi
 
 - **Scope:** an exploration of distributed-systems concepts, not a production-proven database or a claim of full Raft correctness.
 - **Source:** [GitHub repository](https://github.com/kaiju-no-9/GoCache)
+<!-- portfolio:enditem -->
+
+<!-- portfolio:item {"id":"atlas","type":"project","tagline":"browser-based autonomous task agent","category":"AI · browser","repo":"https://github.com/kaiju-no-9/Atlas","stack":["Chrome extension","AI agents","Browser automation"]} -->
+### Atlas
+
+A browser-based agent for carrying out user-directed tasks autonomously through a Chrome extension.
+
+- **Source:** [GitHub repository](https://github.com/kaiju-no-9/Atlas)
+<!-- portfolio:enditem -->
+
+<!-- portfolio:item {"id":"palimpsest","type":"project","tagline":"PyTorch-like C++ library","category":"systems · C++","repo":"https://github.com/kaiju-no-9/Palimpsest","stack":["C++","Machine learning"]} -->
+### Palimpsest
+
+A C++ machine-learning library inspired by PyTorch.
+
+- **Source:** [GitHub repository](https://github.com/kaiju-no-9/Palimpsest)
 <!-- portfolio:enditem -->
 <!-- portfolio:endsection -->
 
